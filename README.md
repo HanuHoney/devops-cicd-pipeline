@@ -1,4 +1,12 @@
 # 🚀 DevOps CI/CD Pipeline
+
+![CI Pipeline](https://github.com/HanuHoney/devops-cicd-pipeline/actions/workflows/ci.yml/badge.svg)
+![CD Pipeline](https://github.com/HanuHoney/devops-cicd-pipeline/actions/workflows/cd.yml/badge.svg)
+![Docker](https://img.shields.io/badge/Docker-2496ED?logo=docker&logoColor=white)
+![Kubernetes](https://img.shields.io/badge/Kubernetes-326CE5?logo=kubernetes&logoColor=white)
+![Python](https://img.shields.io/badge/Python-3.11-3776AB?logo=python&logoColor=white)
+![License](https://img.shields.io/badge/License-MIT-green)
+
 A **production-grade CI/CD pipeline** built from scratch — covering everything from application development to containerization, Kubernetes deployment, and full pipeline automation using GitHub Actions.
 
 > Every commit to `main` automatically lints the code, runs tests, builds a Docker image, pushes it to DockerHub, and deploys to a Kubernetes cluster — with zero manual steps.
