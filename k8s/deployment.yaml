@@ -1,0 +1,52 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: devops-cicd-pipeline
+  labels:
+    app: devops-cicd-pipeline
+    version: v1.0.0
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: devops-cicd-pipeline
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxSurge: 1
+      maxUnavailable: 0        # zero-downtime deploys
+  template:
+    metadata:
+      labels:
+        app: devops-cicd-pipeline
+    spec:
+      containers:
+        - name: app
+          image: devops-cicd-pipeline:v1.0.0
+          imagePullPolicy: Never   # use local image in Minikube
+          ports:
+            - containerPort: 8080
+          env:
+            - name: ENVIRONMENT
+              value: "production"
+            - name: APP_VERSION
+              value: "1.0.0"
+          resources:
+            requests:
+              cpu: "100m"
+              memory: "128Mi"
+            limits:
+              cpu: "250m"
+              memory: "256Mi"
+          livenessProbe:
+            httpGet:
+              path: /health
+              port: 8080
+            initialDelaySeconds: 10
+            periodSeconds: 15
+          readinessProbe:
+            httpGet:
+              path: /ready
+              port: 8080
+            initialDelaySeconds: 5
+            periodSeconds: 10

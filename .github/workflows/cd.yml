@@ -1,0 +1,49 @@
+name: CD Pipeline
+
+on:
+  workflow_run:
+    workflows: ["CI Pipeline"]
+    types:
+      - completed
+    branches: [main]
+
+jobs:
+
+  deploy:
+    name: 🚀 Deploy to Kubernetes
+    runs-on: ubuntu-latest
+    if: ${{ github.event.workflow_run.conclusion == 'success' }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Create kind cluster
+        uses: helm/kind-action@v1.10.0
+        with:
+          cluster_name: cicd-cluster
+
+      - name: Pull image from DockerHub
+        run: docker pull hanuhoney/devops-cicd-pipeline:latest
+
+      - name: Load image into kind
+        run: kind load docker-image hanuhoney/devops-cicd-pipeline:latest --name cicd-cluster
+
+      - name: Update manifest for kind cluster
+        run: |
+          sed -i 's|image: devops-cicd-pipeline:v1.0.0|image: hanuhoney/devops-cicd-pipeline:latest|g' k8s/deployment.yaml
+          sed -i 's|imagePullPolicy: Never|imagePullPolicy: IfNotPresent|g' k8s/deployment.yaml
+
+      - name: Deploy to cluster
+        run: kubectl apply -f k8s/
+
+      - name: Wait for rollout
+        run: kubectl rollout status deployment/devops-cicd-pipeline --timeout=120s
+
+      - name: Verify health
+        run: |
+          kubectl port-forward service/devops-cicd-pipeline-svc 8080:80 &
+          sleep 10
+          curl -f http://localhost:8080/health
+          curl -f http://localhost:8080/ready
+
+      - name: Show final pod status
+        run: kubectl get pods -o wide
